@@ -1,0 +1,186 @@
+# sige-seaweedfs answers file (example).
+#
+# An answers file sets the answers of the wizard. Each line has the format
+# KEY="value". A line that starts with "#" is a comment. The values in this
+# file are the defaults. Delete the lines that you do not need.
+#
+# To make a container with no questions, enter:
+#   ./create_instance.sh --unattended --config my.answers
+# To start the wizard with these values as the defaults, enter:
+#   ./create_instance.sh --config my.answers
+#
+# A blank secret gets a random value. The recipe shows the secrets at the end.
+
+# ---------------------------------------------------------------------------
+# Role
+# ---------------------------------------------------------------------------
+# all-in-one : master, volume server, filer and gateways in one container.
+# master     : the cluster master only.
+# volume     : a volume server only. Set SWFS_MASTER.
+# filer      : a filer with the S3 and WebDAV gateways. Set SWFS_MASTER.
+SWFS_ROLE="all-in-one"
+
+# ---------------------------------------------------------------------------
+# Container
+# ---------------------------------------------------------------------------
+# Blank: the next free ID of the cluster.
+CT_ID=""
+# For the master, volume and filer roles, the default is seaweedfs-<role>.
+CT_HOSTNAME="seaweedfs"
+# Proxmox tags. Separate the tags with semicolons.
+CT_TAGS="seaweedfs"
+# debian-13 or debian-12. The recipe uses the newest standard template.
+CT_OS="debian-13"
+# The storage for the template. Blank: "local", or the first template storage.
+CT_TEMPLATE_STORAGE=""
+# The storage for the root disk. Blank: "local-lvm", "local-zfs", or the first
+# storage that holds container disks.
+CT_ROOTFS_STORAGE=""
+# Root disk size in GiB.
+CT_ROOTFS_SIZE="8"
+CT_CORES="2"
+# Memory and swap in MiB.
+CT_MEMORY="2048"
+CT_SWAP="512"
+# 1: unprivileged container (recommended). 0: privileged container.
+CT_UNPRIVILEGED="1"
+# 1: start the container when the host starts.
+CT_ONBOOT="1"
+# Root password, 8 or more characters. Blank: a random password.
+CT_PASSWORD=""
+# An SSH public key file on the host, for example /root/.ssh/authorized_keys.
+CT_SSH_KEY_FILE=""
+
+# ---------------------------------------------------------------------------
+# Data storage
+# ---------------------------------------------------------------------------
+# volume : a new disk (mount point) on a Proxmox storage.
+# bind   : a directory of the host (bind mount). Set DATA_HOST_PATH.
+# rootfs : a directory on the root disk.
+DATA_MODE="volume"
+# The storage for the data disk. Blank: the root disk storage.
+DATA_STORAGE=""
+# Data disk size in GiB. For the master and filer roles, the default is 8.
+DATA_SIZE="64"
+# The host directory for DATA_MODE="bind". The recipe makes the directory and
+# sets its owner to the seaweedfs user of the container.
+DATA_HOST_PATH=""
+# The data directory in the container.
+DATA_MOUNT="/data"
+# 1: include the data disk in Proxmox backups (vzdump).
+DATA_BACKUP="1"
+
+# ---------------------------------------------------------------------------
+# Network
+# ---------------------------------------------------------------------------
+NET_BRIDGE="vmbr0"
+# dhcp, or a static IPv4 address in CIDR format, for example 192.168.1.50/24.
+NET_IP="dhcp"
+# The IPv4 gateway for a static address. Blank: the gateway of the host.
+NET_GW=""
+# VLAN tag (1-4094). Blank: no VLAN.
+NET_VLAN=""
+# none, auto (SLAAC) or dhcp.
+NET_IP6="none"
+# DNS servers, separated by spaces. Blank: the settings of the host.
+NET_DNS=""
+NET_SEARCHDOMAIN=""
+
+# ---------------------------------------------------------------------------
+# SeaweedFS
+# ---------------------------------------------------------------------------
+# latest, or a release number such as 4.53.
+SWFS_VERSION="latest"
+# standard        : volumes up to 30000 MB.
+# large_disk      : volumes up to 8000 GB.
+# full            : more filer metadata stores, volumes up to 30000 MB.
+# full_large_disk : more filer metadata stores, volumes up to 8000 GB.
+SWFS_VARIANT="standard"
+# The release page. Change it only for a mirror. With a mirror, set a version
+# number, because "latest" needs a redirect from <URL>/latest to <URL>/tag/<version>.
+SWFS_RELEASE_URL="https://github.com/seaweedfs/seaweedfs/releases"
+# The master address(es) as host:port, separated by commas. The volume and filer
+# roles need this answer. Example: 192.168.1.50:9333
+SWFS_MASTER=""
+# For 3 highly available masters: all master addresses as host:port.
+SWFS_PEERS=""
+# The address that other servers use for this container (weed -ip).
+# Blank: the static IPv4 address, or the address that SeaweedFS finds at start.
+SWFS_ADVERTISE=""
+# Default replication: 000 (one copy), 001, 010, 100, 002 ...
+SWFS_REPLICATION="000"
+# Data center and rack names for replication.
+SWFS_DATACENTER=""
+SWFS_RACK=""
+
+# ---------------------------------------------------------------------------
+# Storage tuning
+# ---------------------------------------------------------------------------
+# The size limit of one volume in MB. Blank: 1% of the data disk, rounded up to
+# a power of 2, from 64 MB to 1024 MB.
+SWFS_VOLUME_SIZE_MB=""
+# The maximum number of volumes. 0: calculate from the free disk space.
+SWFS_VOLUME_MAX="0"
+# memory, leveldb, leveldbMedium or leveldbLarge.
+SWFS_INDEX="memory"
+# Disk type tag: hdd, ssd or a custom tag. Blank: hdd.
+SWFS_DISK_TYPE=""
+
+# ---------------------------------------------------------------------------
+# Services (1: on, 0: off)
+# ---------------------------------------------------------------------------
+# Filer (all-in-one role). S3 and WebDAV turn on the filer.
+SWFS_FILER="1"
+# S3 gateway (all-in-one and filer roles).
+SWFS_S3="1"
+# WebDAV gateway (all-in-one and filer roles). WebDAV has no password protection.
+SWFS_WEBDAV="0"
+# Admin web UI (all-in-one, master and filer roles).
+SWFS_ADMIN="1"
+# Prometheus metrics endpoint.
+SWFS_METRICS="0"
+# Iceberg REST catalog and Lance namespace on the S3 gateway.
+SWFS_ICEBERG="0"
+# Anonymous statistics to the SeaweedFS project (all-in-one and master roles).
+SWFS_TELEMETRY="0"
+
+# ---------------------------------------------------------------------------
+# Credentials and buckets
+# ---------------------------------------------------------------------------
+# S3 keys. Blank: random keys.
+SWFS_S3_ACCESS_KEY=""
+SWFS_S3_SECRET_KEY=""
+# S3 buckets to make, separated by commas. Example: backups,media
+SWFS_BUCKETS=""
+SWFS_ADMIN_USER="admin"
+# Admin web UI password. Blank: a random password.
+SWFS_ADMIN_PASSWORD=""
+# More arguments for the main weed command, separated by spaces.
+# Example: -volume.minFreeSpace=10GiB
+SWFS_EXTRA_ARGS=""
+
+# ---------------------------------------------------------------------------
+# Ports (TCP). The master, volume, filer, S3 and admin services also use the
+# port + 10000 for gRPC.
+# ---------------------------------------------------------------------------
+PORT_MASTER="9333"
+PORT_VOLUME="8080"
+PORT_FILER="8888"
+PORT_S3="8333"
+PORT_WEBDAV="7333"
+PORT_ADMIN="12535"
+PORT_METRICS="9327"
+PORT_ICEBERG="8181"
+PORT_LANCE="9101"
+
+# ---------------------------------------------------------------------------
+# Proxmox firewall
+# ---------------------------------------------------------------------------
+# 1: turn on the firewall of the container. The rules let in only the ports of
+# the services. The rules operate only if the datacenter firewall is on.
+FW_ENABLE="0"
+# The source addresses that can connect: IPv4 addresses or CIDR values,
+# separated by commas. Blank: all addresses.
+FW_SOURCE=""
+# 1: let in SSH (port 22) from the sources.
+FW_SSH="1"
